@@ -1,0 +1,354 @@
+// DOM Elements
+const youtubeUrlInput = document.getElementById('youtubeUrl');
+const apiKeyInput = document.getElementById('apiKey');
+const modelSelect = document.getElementById('modelSelect');
+const convertBtn = document.getElementById('convertBtn');
+const formSection = document.getElementById('formSection');
+const loadingSection = document.getElementById('loadingSection');
+const loadingText = document.getElementById('loadingText');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const resultSection = document.getElementById('resultSection');
+const resultContent = document.getElementById('resultContent');
+const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const newConversionBtn = document.getElementById('newConversionBtn');
+const errorSection = document.getElementById('errorSection');
+const errorMessage = document.getElementById('errorMessage');
+const retryBtn = document.getElementById('retryBtn');
+
+// State
+let generatedMarkdown = '';
+let videoTitle = '';
+let currentVideoId = '';
+
+// Constants
+const STORAGE_KEY = 'gemini_api_key';
+const MODEL_KEY = 'selected_model';
+
+// Extract video ID from YouTube URL
+function extractVideoId(url) {
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+        /^([a-zA-Z0-9_-]{11})$/
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    return null;
+}
+
+// Get current tab
+async function getCurrentTab() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tab;
+}
+
+// Show/Hide sections
+function showSection(section) {
+    [formSection, loadingSection, resultSection, errorSection].forEach(el => {
+        el.style.display = 'none';
+    });
+    if (section) section.style.display = 'block';
+}
+
+
+// Update loading progress
+function updateProgress(stepNumber, text) {
+    loadingText.textContent = text;
+    [step1, step2, step3].forEach(step => step.classList.remove('active'));
+    if (stepNumber === 1) step1.classList.add('active');
+    if (stepNumber === 2) step2.classList.add('active');
+    if (stepNumber === 3) step3.classList.add('active');
+}
+
+// Show error
+function showError(message) {
+    errorMessage.textContent = message;
+    showSection(errorSection);
+    convertBtn.disabled = false;
+}
+
+// Fetch transcript using content script (captionTracks method)
+async function fetchTranscript(videoId) {
+    updateProgress(1, '正在獲取字幕...');
+
+    try {
+        const tab = await getCurrentTab();
+        if (!tab || !tab.id) {
+            throw new Error('無法獲取當前分頁');
+        }
+
+        // 向 content script 請求字幕
+        const response = await new Promise((resolve, reject) => {
+            chrome.tabs.sendMessage(tab.id, { action: 'GET_CAPTIONS' }, (response) => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                    resolve(response);
+                }
+            });
+        });
+
+        if (response.error) {
+            throw new Error(response.error);
+        }
+
+        if (!response.transcript || response.transcript.length < 50) {
+            throw new Error('字幕內容太短或為空');
+        }
+
+        console.log('字幕擷取成功:', {
+            length: response.length,
+            language: response.language,
+            isAuto: response.isAuto
+        });
+
+        updateProgress(1, '字幕獲取成功！');
+
+        return {
+            transcript: response.transcript,
+            language: response.language,
+            isAuto: response.isAuto
+        };
+
+    } catch (error) {
+        console.error('Fetch transcript error:', error);
+
+        // 提供更友善的錯誤訊息
+        if (error.message.includes('Receiving end does not exist')) {
+            throw new Error('請重新整理 YouTube 頁面後再試');
+        }
+
+        throw new Error(`獲取字幕失敗: ${error.message}`);
+    }
+}
+
+
+
+
+// Generate blog post using Gemini API
+async function generateBlogPost(transcript, apiKey, modelName) {
+    updateProgress(2, '正在連接 Gemini AI...');
+
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+    const prompt = `你是一位專業的部落格作家和 SEO 專家。請將以下 YouTube 視頻字幕轉換為一篇高品質的部落格文章。
+
+要求：
+1. 創建一個吸引人的標題（使用 # 標題格式）
+2. 撰寫引人入勝的開頭段落，概述影片主題
+3. 將內容組織成清晰的章節（使用 ## 和 ### 標題）
+4. 使用項目符號和編號列表來提高可讀性
+5. 在重點處使用 **粗體** 強調
+6. 撰寫一個總結段落
+7. 確保語言流暢、專業且易於理解
+8. 優化 SEO 關鍵字的使用
+9. 使用繁體中文撰寫
+10. 移除口語化的贅詞，使文章更精煉
+
+原始字幕內容：
+${transcript}
+
+請生成完整的 Markdown 格式部落格文章：`;
+
+    try {
+        updateProgress(3, '正在生成文章...');
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 8192
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 400) {
+                throw new Error('API Key 無效，請檢查您的 Gemini API Key');
+            }
+            if (response.status === 429) {
+                throw new Error('API 請求次數超過限制，請稍後再試');
+            }
+            throw new Error(errorData.error?.message || `API 錯誤 (${response.status})`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!text) {
+            throw new Error('AI 未能生成有效的內容');
+        }
+
+        return text;
+    } catch (error) {
+        console.error('Generate error:', error);
+        throw new Error(`生成文章失敗: ${error.message}`);
+    }
+}
+
+
+// Simple markdown to HTML converter
+function markdownToHtml(markdown) {
+    return markdown
+        // Headers
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        // Bold
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Unordered lists
+        .replace(/^\- (.*$)/gim, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        // Ordered lists
+        .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+        // Paragraphs
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^(.+)$/gim, '<p>$1</p>')
+        // Clean up
+        .replace(/<p><h/g, '<h')
+        .replace(/<\/h(\d)><\/p>/g, '</h$1>')
+        .replace(/<p><li>/g, '<li>')
+        .replace(/<\/li><\/p>/g, '</li>')
+        .replace(/<p><ul>/g, '<ul>')
+        .replace(/<\/ul><\/p>/g, '</ul>')
+        .replace(/<p><\/p>/g, '');
+}
+
+// Initialize popup
+async function initPopup() {
+    // Load saved API key and model
+    chrome.storage.local.get([STORAGE_KEY, MODEL_KEY], (result) => {
+        if (result[STORAGE_KEY]) {
+            apiKeyInput.value = result[STORAGE_KEY];
+        }
+        if (result[MODEL_KEY]) {
+            modelSelect.value = result[MODEL_KEY];
+        }
+    });
+
+    // Get current tab URL
+    const tab = await getCurrentTab();
+    const url = tab?.url || '';
+
+    if (url.includes('youtube.com/watch')) {
+        const videoId = extractVideoId(url);
+        if (videoId) {
+            youtubeUrlInput.value = url;
+            currentVideoId = videoId;
+        }
+    } else {
+        youtubeUrlInput.value = '';
+        youtubeUrlInput.placeholder = '請在 YouTube 影片頁面使用';
+        convertBtn.disabled = true;
+    }
+}
+
+// Handle conversion
+convertBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
+    const selectedModel = modelSelect.value;
+
+    if (!apiKey) {
+        showError('請輸入 Gemini API Key');
+        return;
+    }
+
+    if (!currentVideoId) {
+        showError('請在 YouTube 影片頁面使用此擴充功能');
+        return;
+    }
+
+    // Save settings
+    chrome.storage.local.set({
+        [STORAGE_KEY]: apiKey,
+        [MODEL_KEY]: selectedModel
+    });
+
+    convertBtn.disabled = true;
+    showSection(loadingSection);
+
+    try {
+        // Step 1: Fetch transcript
+        const result = await fetchTranscript(currentVideoId);
+        const transcript = result.transcript;
+
+        if (!transcript || transcript.trim().length < 50) {
+            throw new Error('字幕內容太短或為空');
+        }
+
+        // Step 2 & 3: Generate blog post
+        const blogPost = await generateBlogPost(transcript, apiKey, selectedModel);
+
+        // Store result
+        generatedMarkdown = blogPost;
+        videoTitle = `youtube-blog-${currentVideoId}`;
+
+        // Render result
+        resultContent.innerHTML = markdownToHtml(blogPost);
+
+        showSection(resultSection);
+        convertBtn.disabled = false;
+
+    } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || '處理過程中發生錯誤');
+    }
+});
+
+// Copy to clipboard
+copyBtn.addEventListener('click', async () => {
+    try {
+        await navigator.clipboard.writeText(generatedMarkdown);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="btn-icon">✓</span>已複製！';
+        copyBtn.classList.add('success');
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove('success');
+        }, 2000);
+    } catch (error) {
+        alert('複製失敗，請手動選取複製');
+    }
+});
+
+// Download as markdown file
+downloadBtn.addEventListener('click', () => {
+    const blob = new Blob([generatedMarkdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${videoTitle}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+// New conversion
+newConversionBtn.addEventListener('click', () => {
+    showSection(formSection);
+    generatedMarkdown = '';
+    videoTitle = '';
+});
+
+// Retry
+retryBtn.addEventListener('click', () => {
+    showSection(formSection);
+});
+
+// Initialize
+initPopup();

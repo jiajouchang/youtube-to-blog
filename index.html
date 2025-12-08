@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 轉部落格文章生成器 - 多 AI 支援</title>
+    <meta name="description" content="使用多種 AI (Gemini, OpenAI, Claude, Groq) 將 YouTube 視頻轉換為 SEO 優化的部落格文章">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="main-title">
+                    <span class="icon">🎬</span>
+                    YouTube 轉部落格
+                </h1>
+                <p class="subtitle">支援多種 AI 供應商 • 串流生成 • 專業 SEO 優化</p>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-section glass-card">
+            <form id="convertForm">
+                <!-- YouTube URL -->
+                <div class="form-group">
+                    <label for="youtubeUrl" class="form-label">
+                        <span class="label-icon">🔗</span>
+                        YouTube URL
+                    </label>
+                    <input type="text" id="youtubeUrl" class="form-input"
+                        placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+
+                <!-- AI Provider Selection -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="providerSelect" class="form-label">
+                            <span class="label-icon">🤖</span>
+                            AI 供應商
+                        </label>
+                        <select id="providerSelect" class="form-input">
+                            <option value="gemini">Google Gemini 🆓</option>
+                            <option value="openai">OpenAI GPT</option>
+                            <option value="anthropic">Anthropic Claude</option>
+                            <option value="groq">Groq 🆓</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modelSelect" class="form-label">
+                            <span class="label-icon">⚙️</span>
+                            模型
+                        </label>
+                        <select id="modelSelect" class="form-input">
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash ⚡</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- API Key -->
+                <div class="form-group">
+                    <label for="apiKey" class="form-label">
+                        <span class="label-icon">🔑</span>
+                        API Key
+                        <span class="api-hint">為所選供應商</span>
+                    </label>
+                    <input type="password" id="apiKey" class="form-input" placeholder="輸入您的 API 密鑰" required>
+                    <small class="form-hint">
+                        API 密鑰會安全儲存在您的瀏覽器中，不會上傳到服務器
+                    </small>
+                    <div id="apiLinkContainer" class="api-link-container" style="display: none;">
+                        <span class="api-link-icon">🔗</span>
+                        <span class="api-link-text">獲取API密鑰：</span>
+                        <a id="apiLink" href="#" target="_blank" rel="noopener noreferrer" class="api-link"></a>
+                    </div>
+                </div>
+
+                <!-- Style and Language -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="styleSelect" class="form-label">
+                            <span class="label-icon">🎨</span>
+                            文章風格
+                        </label>
+                        <select id="styleSelect" class="form-input">
+                            <option value="professional">專業正式</option>
+                            <option value="casual">輕鬆口語</option>
+                            <option value="technical">技術詳細</option>
+                            <option value="news">新聞報導</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="languageSelect" class="form-label">
+                            <span class="label-icon">🌐</span>
+                            輸出語言
+                        </label>
+                        <select id="languageSelect" class="form-input">
+                            <option value="繁體中文">繁體中文</option>
+                            <option value="简体中文">简体中文</option>
+                            <option value="English">English</option>
+                            <option value="日本語">日本語</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Advanced Options -->
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="streamToggle">
+                        <span class="checkbox-text">
+                            ⚡ 啟用串流生成（即時顯示生成過程）
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span class="btn-icon">✨</span>
+                    <span class="btn-text">生成部落格文章</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Loading Section -->
+        <section class="loading-section" id="loadingSection" style="display: none;">
+            <div class="glass-card loading-card">
+                <div class="loading-spinner"></div>
+                <p class="loading-text" id="loadingText">正在處理中...</p>
+                <div class="progress-steps">
+                    <div class="step" id="step1">
+                        <div class="step-icon">📹</div>
+                        <div class="step-text">獲取視頻資訊</div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-icon">📝</div>
+                        <div class="step-text">提取文字稿</div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-icon">🤖</div>
+                        <div class="step-text">AI 生成文章</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section class="result-section" id="resultSection" style="display: none;">
+            <div class="glass-card result-card">
+                <div class="result-header">
+                    <h2 class="result-title">
+                        <span class="icon">📄</span>
+                        生成的部落格文章
+                    </h2>
+                    <div class="result-actions">
+                        <button class="btn-secondary" id="copyBtn">
+                            <span class="btn-icon">📋</span>
+                            複製
+                        </button>
+                        <button class="btn-secondary" id="downloadBtn">
+                            <span class="btn-icon">⬇️</span>
+                            下載
+                        </button>
+                        <button class="btn-secondary" id="newConversionBtn">
+                            <span class="btn-icon">🔄</span>
+                            建立新的
+                        </button>
+                    </div>
+                </div>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+        </section>
+
+        <!-- Error Section -->
+        <section class="error-section" id="errorSection" style="display: none;">
+            <div class="glass-card error-card">
+                <div class="error-icon">⚠️</div>
+                <h3 class="error-title">發生錯誤</h3>
+                <p class="error-message" id="errorMessage"></p>
+                <button class="btn-secondary" id="retryBtn">
+                    <span class="btn-icon">🔄</span>
+                    重試
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 轉部落格文章</title>
+    <link rel="stylesheet" href="sidepanel.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎬 YouTube 轉部落格</h1>
+            <p class="subtitle">使用 AI 將影片轉換為 SEO 優化文章</p>
+        </header>
+
+        <!-- Form Section -->
+        <section id="form-section" class="section">
+            <!-- Video URL Display -->
+            <div class="form-group">
+                <label for="video-url">YouTube 影片網址</label>
+                <input type="text" id="video-url" placeholder="自動偵測目前頁面的影片..." readonly class="readonly-input">
+                <small class="hint" id="url-hint">請開啟 YouTube 影片頁面</small>
+            </div>
+
+            <!-- AI Provider Selection -->
+            <div class="form-group">
+                <label for="provider-select">
+                    🤖 AI 供應商
+                </label>
+                <select id="provider-select">
+                    <option value="gemini">Google Gemini 🆓</option>
+                    <option value="groq">Groq 🆓</option>
+                    <option value="openai">OpenAI GPT</option>
+                    <option value="anthropic">Anthropic Claude</option>
+                    <option value="deepseek">DeepSeek 💰</option>
+                </select>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="form-group">
+                <label for="model-select">⚙️ AI 模型</label>
+                <select id="model-select">
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+
+            <!-- API Key Input -->
+            <div class="form-group">
+                <label for="api-key">
+                    🔑 API Key
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link"
+                        id="api-key-link">
+                        (取得 API Key)
+                    </a>
+                </label>
+                <input type="password" id="api-key" placeholder="輸入您的 API Key">
+                <small class="hint">您的 API Key 會安全儲存在本地</small>
+            </div>
+
+            <!-- Convert Button -->
+            <button id="convert-btn" class="btn-primary" disabled>
+                🚀 開始轉換
+            </button>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loading-section" class="section hidden">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <h3>正在處理中...</h3>
+                <p id="loading-status">準備中...</p>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section id="result-section" class="section hidden">
+            <div class="result-header">
+                <h3>✅ 轉換完成！</h3>
+                <div class="action-buttons">
+                    <button id="copy-btn" class="btn-secondary">
+                        📋 複製內容
+                    </button>
+                    <button id="download-btn" class="btn-secondary">
+                        💾 下載 .md
+                    </button>
+                    <button id="new-conversion-btn" class="btn-secondary">
+                        🔄 新轉換
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-content" class="result-content">
+                <!-- Markdown content will be rendered here -->
+            </div>
+        </section>
+
+        <!-- Error Section -->
+        <section id="error-section" class="section hidden">
+            <div class="error-container">
+                <h3>❌ 發生錯誤</h3>
+                <p id="error-message" class="error-message"></p>
+                <button id="retry-btn" class="btn-primary">
+                    🔄 重試
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="sidepanel.js"></script>
+</body>
+
+</html>

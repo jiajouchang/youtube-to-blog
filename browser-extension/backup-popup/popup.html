@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 轉部落格</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">
+                <span class="logo">📝</span>
+                <h1>YouTube 轉部落格</h1>
+            </div>
+            <span class="version">v2.0</span>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section" id="formSection">
+            <div class="input-group">
+                <label for="youtubeUrl">
+                    <span class="label-icon">🎥</span>
+                    YouTube 網址
+                </label>
+                <input type="text" id="youtubeUrl" placeholder="會自動偵測目前頁面..." readonly class="url-input">
+            </div>
+
+            <div class="input-group">
+                <label for="apiKey">
+                    <span class="label-icon">🔑</span>
+                    Gemini API Key
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link">取得 API Key</a>
+                </label>
+                <input type="password" id="apiKey" placeholder="輸入您的 Gemini API Key" required>
+            </div>
+
+            <div class="input-group">
+                <label for="modelSelect">
+                    <span class="label-icon">🤖</span>
+                    AI 模型
+                </label>
+                <select id="modelSelect" class="model-select">
+                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash ⚡</option>
+                    <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash 🚀</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro 💎</option>
+                </select>
+            </div>
+
+            <button id="convertBtn" class="btn btn-primary">
+                <span class="btn-icon">✨</span>
+                開始轉換
+            </button>
+        </div>
+
+        <!-- Loading Section -->
+        <div class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p class="loading-text" id="loadingText">處理中...</p>
+            <div class="progress-steps">
+                <div class="step" id="step1">
+                    <div class="step-icon">📥</div>
+                    <div class="step-text">獲取字幕</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-icon">🤖</div>
+                    <div class="step-text">AI 處理</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-icon">✨</div>
+                    <div class="step-text">生成文章</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection" style="display: none;">
+            <div class="success-message">
+                <span class="success-icon">🎉</span>
+                <span>文章生成成功！</span>
+            </div>
+            <div class="result-content" id="resultContent"></div>
+            <div class="action-buttons">
+                <button id="copyBtn" class="btn btn-secondary">
+                    <span class="btn-icon">📋</span>
+                    複製 Markdown
+                </button>
+                <button id="downloadBtn" class="btn btn-secondary">
+                    <span class="btn-icon">💾</span>
+                    下載檔案
+                </button>
+                <button id="newConversionBtn" class="btn btn-outline">
+                    <span class="btn-icon">🔄</span>
+                    新轉換
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="errorSection" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h3>發生錯誤</h3>
+            <p id="errorMessage" class="error-message"></p>
+            <button id="retryBtn" class="btn btn-primary">
+                <span class="btn-icon">🔄</span>
+                重試
+            </button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
