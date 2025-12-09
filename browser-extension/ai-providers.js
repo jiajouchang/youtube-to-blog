@@ -5,6 +5,8 @@
  * 使用原生 fetch API 直接呼叫各供應商的 REST API
  */
 
+import { getMessage } from './i18n.js';
+
 // ============================================================================
 // Provider Configurations
 // ============================================================================
@@ -84,17 +86,10 @@ const AI_PROVIDERS = {
 /**
  * 建立標準化的 prompt
  */
-function buildPrompt(transcript, language = '繁體中文', style = 'professional') {
-    const styleDescriptions = {
+const PROMPT_TEMPLATES = {
+    'zh_TW': {
         professional: '專業且正式',
-        casual: '輕鬆且口語化',
-        technical: '技術性且詳細',
-        news: '新聞報導風格',
-    };
-
-    const styleDesc = styleDescriptions[style] || styleDescriptions.professional;
-
-    return `你是一位專業的部落格作家和 SEO 專家。請將以下 YouTube 視頻文字稿轉換為一篇格式完美、SEO 優化的部落格文章。
+        template: (transcript, language, styleDesc) => `你是一位專業的部落格作家和 SEO 專家。請將以下 YouTube 視頻文字稿轉換為一篇格式完美、SEO 優化的部落格文章。
 
 文章風格：${styleDesc}
 輸出語言：${language}
@@ -112,7 +107,48 @@ function buildPrompt(transcript, language = '繁體中文', style = 'professiona
 原始文字稿：
 ${transcript}
 
-請生成完整的 Markdown 格式部落格文章：`;
+請生成完整的 Markdown 格式部落格文章：`
+    },
+    'en': {
+        professional: 'Professional and Formal',
+        template: (transcript, language, styleDesc) => `You are a professional blog writer and SEO expert. Please convert the following YouTube video transcript into a perfectly formatted, SEO-optimized blog article.
+
+Article Style: ${styleDesc} (Professional)
+Output Language: ${language}
+
+Requirements:
+1. Create a catchy Title (use # Title format)
+2. Write an engaging Introduction
+3. Organize content into clear Sections (use ## and ### headings)
+4. Use Bullet Points and Numbered Lists for readability
+5. Use Bold text for emphasis where appropriate
+6. Write a Summary/Conclusion
+7. Ensure the tone is professional, fluent, and easy to understand
+8. Optimize for SEO keywords
+
+Original Transcript:
+${transcript}
+
+Please generate the complete blog article in Markdown format:`
+    }
+};
+
+/**
+ * 建立標準化的 prompt
+ */
+function buildPrompt(transcript, language = 'English', style = 'professional') {
+    // Determine locale template to use based on output language
+    // If output is Chinese, use Chinese template (instructions in Chinese)
+    // If output is English, use English template (instructions in English)
+    let locale = 'en';
+    if (language === 'Traditional Chinese' || language === '繁體中文' || language === 'zh-TW') {
+        locale = 'zh_TW';
+    }
+
+    const templateConfig = PROMPT_TEMPLATES[locale];
+    const styleDesc = templateConfig[style] || templateConfig.professional;
+
+    return templateConfig.template(transcript, language, styleDesc);
 }
 
 /**
@@ -258,7 +294,8 @@ function getProviderInfo(providerId) {
  * 統一的內容生成函數
  */
 async function generateContent(providerId, apiKey, model, transcript, options = {}) {
-    const { language = '繁體中文', style = 'professional' } = options;
+    // Default to English if not specified
+    const { language = 'English', style = 'professional' } = options;
     const prompt = buildPrompt(transcript, language, style);
 
     console.log(`[AI Providers] Calling ${providerId} API with model: ${model}`);
@@ -287,7 +324,7 @@ async function generateContent(providerId, apiKey, model, transcript, options = 
         }
 
         if (!result || result.trim().length === 0) {
-            throw new Error('AI 未能生成有效的內容');
+            throw new Error(getMessage('errAiNoContent'));
         }
 
         console.log(`[AI Providers] Success! Generated ${result.length} characters`);
@@ -308,50 +345,47 @@ function getFriendlyErrorMessage(error, providerId) {
     const lowerMsg = rawMessage.toLowerCase();
 
     // 1. 配額/速率限制 (Quota/Rate Limit)
-    // 包含: 429, quota exceeded, rate limit, resource exhausted
     if (rawMessage.includes('429') ||
         lowerMsg.includes('quota') ||
         lowerMsg.includes('rate limit') ||
         lowerMsg.includes('resource has been exhausted')) {
-        return `❌ ${providerName} 配額已達上限 (429)\n\n原因可能是：\n1. 免費版 API 使用次數/速度已達限制\n2. 帳戶額度不足\n\n建議採取行動：\n• 稍等幾分鐘後再試 (通常每分鐘限制會重置)\n• 切換到其他 AI 供應商 (如 Groq 或 Gemini)`;
+        return getMessage('errApiQuota', [providerName]);
     }
 
     // 2. 認證錯誤 (Auth)
-    // 包含: 401, 403, api key, unauthorized, invalid
     if (rawMessage.includes('401') ||
         rawMessage.includes('403') ||
         (lowerMsg.includes('api key') && (lowerMsg.includes('invalid') || lowerMsg.includes('incorrect'))) ||
         lowerMsg.includes('unauthorized')) {
-        return `❌ API Key 無效或權限不足\n\n請檢查您輸入的 ${providerName} API Key 是否正確。\n\n• 確認沒有多餘的空白\n• 確認 Key 是否已過期\n• 您可以點擊「取得 API Key」連結重新申請`;
+        return getMessage('errApiAuth');
     }
 
     // 3. 模型錯誤 (Model)
     if (lowerMsg.includes('model') && lowerMsg.includes('not found')) {
-        return `❌ 找不到模型或無權限\n\n您選擇的模型可能不支援您的帳號類別，或已停用。\n請嘗試切換該供應商底下的其他模型 (例如從 Pro 切換為 Flash)。`;
+        return getMessage('errApiModel');
     }
 
     // 4. 服務過載 (Overloaded)
     if (lowerMsg.includes('overloaded') || rawMessage.includes('503')) {
-        return `❌ ${providerName} 系統繁忙\n\nAI 服務器目前負載過高，暫時無法回應。\n請稍等片刻再試。`;
+        return getMessage('errApiOverloaded', [providerName]);
     }
 
     // 5. 網路/安全性錯誤
     if (lowerMsg.includes('fetch') || lowerMsg.includes('network') || lowerMsg.includes('security')) {
-        return `❌ 網路連線錯誤\n\n無法連接到 ${providerName} 伺服器。\n請檢查網路狀態，或確認防火牆/VPN 設定。`;
+        return getMessage('errApiNetwork');
     }
 
     // 6. 內容過濾/安全設定 (Safety)
     if (lowerMsg.includes('safety') || lowerMsg.includes('harmful') || lowerMsg.includes('blocked')) {
-        return `❌ 內容被 AI 安全機制攔截\n\n影片內容可能包含 ${providerName} 判定為敏感或不安全的議題，因此拒絕生成。`;
+        return getMessage('errApiSafety');
     }
 
     // 7. 過濾掉過長的技術性錯誤訊息
     if (rawMessage.length > 150 || rawMessage.trim().startsWith('{') || rawMessage.includes('Error:')) {
-        // 嘗試提取簡短描述
-        return `❌ 發生未預期的錯誤\n\n請重試或切換其他供應商。\n(系統錯誤: ${rawMessage.substring(0, 50)}...)`;
+        return getMessage('errUnexpected') + ` (${rawMessage.substring(0, 50)}...)`;
     }
 
-    return `❌ 發生錯誤: ${rawMessage}`;
+    return `❌ Error: ${rawMessage}`;
 }
 
 // Export for use in sidepanel.js

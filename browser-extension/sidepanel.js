@@ -11,6 +11,7 @@
  */
 
 import { AI_PROVIDERS, generateContent } from './ai-providers.js';
+import { getMessage, setLanguage, getLanguage } from './i18n.js';
 
 // ============================================================================
 // State Management
@@ -23,7 +24,9 @@ const state = {
     selectedModel: 'gemini-2.5-flash',
     apiKeys: {}, // { providerId: apiKey }
     transcript: null,
-    blogPost: null
+    blogPost: null,
+    outputLanguage: 'English', // Default output language
+    uiLanguage: 'en' // Default UI language
 };
 
 // DOM Elements
@@ -39,6 +42,8 @@ const elements = {
     urlHint: null,
     providerSelect: null,
     modelSelect: null,
+    outputLanguageSelect: null,
+    uiLanguageSelect: null,
     apiKeyInput: null,
     apiKeyLink: null,
     convertBtn: null,
@@ -66,14 +71,17 @@ const elements = {
  * Initialize the Side Panel
  */
 async function initSidePanel() {
-    // Get DOM elements
+    // Get DOM elements first
     getDOMElements();
+
+    // Load saved settings from Chrome Storage (including uiLanguage)
+    await loadSettings();
+
+    // Localize HTML based on saved/default language
+    localizeHtml();
 
     // Populate provider select and model select
     populateProviderOptions();
-
-    // Load saved settings from Chrome Storage
-    await loadSettings();
 
     // Set up event listeners
     setupEventListeners();
@@ -85,6 +93,35 @@ async function initSidePanel() {
     listenForVideoUpdates();
 
     console.log('[SidePanel] Initialized with multi-provider support');
+}
+
+/**
+ * Localize HTML elements
+ */
+function localizeHtml() {
+    // Apply current language
+    setLanguage(state.uiLanguage);
+
+    const i18nElements = document.querySelectorAll('[data-i18n]');
+    i18nElements.forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const message = getMessage(key);
+        if (message) {
+            element.textContent = message;
+        }
+    });
+
+    const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+    placeholders.forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        const message = getMessage(key);
+        if (message) {
+            element.placeholder = message;
+        }
+    });
+
+    // Update document lang attribute
+    document.documentElement.lang = state.uiLanguage === 'zh_TW' ? 'zh-TW' : 'en';
 }
 
 /**
@@ -102,6 +139,8 @@ function getDOMElements() {
     elements.urlHint = document.getElementById('url-hint');
     elements.providerSelect = document.getElementById('provider-select');
     elements.modelSelect = document.getElementById('model-select');
+    elements.outputLanguageSelect = document.getElementById('output-language-select');
+    elements.uiLanguageSelect = document.getElementById('ui-language-select');
     elements.apiKeyInput = document.getElementById('api-key');
     elements.apiKeyLink = document.getElementById('api-key-link');
     elements.convertBtn = document.getElementById('convert-btn');
@@ -153,7 +192,7 @@ function updateModelOptions(providerId) {
     // Update API key link
     if (elements.apiKeyLink) {
         elements.apiKeyLink.href = provider.apiUrl;
-        elements.apiKeyLink.textContent = `(取得 ${provider.name} API Key)`;
+        elements.apiKeyLink.textContent = getMessage('linkGetProviderApiKey', [provider.name]);
     }
 }
 
@@ -165,8 +204,18 @@ async function loadSettings() {
         const data = await chrome.storage.local.get([
             'selectedProvider',
             'selectedModel',
-            'apiKeys'
+            'apiKeys',
+            'outputLanguage',
+            'uiLanguage'
         ]);
+
+        // UI Language must be loaded first before localizeHtml is called
+        if (data.uiLanguage) {
+            state.uiLanguage = data.uiLanguage;
+            if (elements.uiLanguageSelect) {
+                elements.uiLanguageSelect.value = data.uiLanguage;
+            }
+        }
 
         if (data.selectedProvider) {
             state.selectedProvider = data.selectedProvider;
@@ -177,6 +226,11 @@ async function loadSettings() {
         if (data.selectedModel) {
             state.selectedModel = data.selectedModel;
             elements.modelSelect.value = data.selectedModel;
+        }
+
+        if (data.outputLanguage) {
+            state.outputLanguage = data.outputLanguage;
+            elements.outputLanguageSelect.value = data.outputLanguage;
         }
 
         if (data.apiKeys) {
@@ -203,6 +257,14 @@ function setupEventListeners() {
 
     // Model select
     elements.modelSelect.addEventListener('change', handleModelChange);
+
+    // Output Language select
+    elements.outputLanguageSelect.addEventListener('change', handleOutputLanguageChange);
+
+    // UI Language select
+    if (elements.uiLanguageSelect) {
+        elements.uiLanguageSelect.addEventListener('change', handleUILanguageChange);
+    }
 
     // API Key input
     elements.apiKeyInput.addEventListener('input', handleApiKeyInput);
@@ -264,11 +326,11 @@ function updateVideoInfo(videoId, videoUrl) {
 
     if (videoId) {
         elements.videoUrlInput.value = videoUrl;
-        elements.urlHint.textContent = `影片 ID: ${videoId}`;
+        elements.urlHint.textContent = getMessage('hintVideoId', [videoId]);
         elements.urlHint.style.color = '#1e8e3e';
     } else {
         elements.videoUrlInput.value = '';
-        elements.urlHint.textContent = '請開啟 YouTube 影片頁面';
+        elements.urlHint.textContent = getMessage('hintVideoUrl');
         elements.urlHint.style.color = '#5f6368';
     }
 
@@ -315,6 +377,52 @@ async function handleModelChange(event) {
         await chrome.storage.local.set({ selectedModel: model });
     } catch (error) {
         console.error('Failed to save model selection:', error);
+    }
+}
+
+/**
+ * Handle output language selection change
+ */
+async function handleOutputLanguageChange(event) {
+    const language = event.target.value;
+    state.outputLanguage = language;
+
+    // Save to Chrome Storage
+    try {
+        await chrome.storage.local.set({ outputLanguage: language });
+    } catch (error) {
+        console.error('Failed to save output language:', error);
+    }
+}
+
+/**
+ * Handle UI language selection change
+ */
+async function handleUILanguageChange(event) {
+    const language = event.target.value;
+    state.uiLanguage = language;
+
+    // Save to Chrome Storage
+    try {
+        await chrome.storage.local.set({ uiLanguage: language });
+    } catch (error) {
+        console.error('Failed to save UI language:', error);
+    }
+
+    // Re-localize the UI
+    localizeHtml();
+
+    // Update dynamic elements that may have been set programmatically
+    if (state.videoId) {
+        elements.urlHint.textContent = getMessage('hintVideoId', [state.videoId]);
+    } else {
+        elements.urlHint.textContent = getMessage('hintVideoUrl');
+    }
+
+    // Update API key link
+    const provider = AI_PROVIDERS[state.selectedProvider];
+    if (provider && elements.apiKeyLink) {
+        elements.apiKeyLink.textContent = getMessage('linkGetProviderApiKey', [provider.name]);
     }
 }
 
@@ -388,41 +496,42 @@ async function handleConvert() {
     const apiKey = state.apiKeys[state.selectedProvider] || elements.apiKeyInput.value.trim();
 
     if (!state.videoId || !apiKey) {
-        showError('請確認已選擇影片並輸入 API Key');
+        showError(getMessage('errNoVideo'));
         return;
     }
 
     // Show loading section
     showSection('loading');
-    updateProgress(0, '準備中...');
+    updateProgress(0, getMessage('statusPreparing'));
 
     try {
         // Step 1: Fetch transcript
-        updateProgress(10, '正在獲取影片字幕...');
+        updateProgress(10, getMessage('statusExtracting'));
         const transcript = await fetchTranscript(state.videoId);
         state.transcript = transcript;
 
         // Step 2: Generate blog post
         const providerName = AI_PROVIDERS[state.selectedProvider]?.name || state.selectedProvider;
-        updateProgress(50, `正在使用 ${providerName} 生成部落格文章...`);
+        updateProgress(50, getMessage('statusGenerating', [providerName]));
 
         const blogPost = await generateContent(
             state.selectedProvider,
             apiKey,
             state.selectedModel,
-            transcript
+            transcript,
+            { language: state.outputLanguage } // Pass selected output language
         );
         state.blogPost = blogPost;
 
         // Step 3: Show result
-        updateProgress(100, '完成！');
+        updateProgress(100, getMessage('statusComplete'));
         setTimeout(() => {
             showResult(blogPost);
         }, 500);
 
     } catch (error) {
         console.error('Conversion failed:', error);
-        showError(error.message || '轉換失敗，請重試');
+        showError(error.message || getMessage('errConversionFailed'));
     }
 }
 
@@ -448,7 +557,10 @@ async function fetchTranscript(videoId, retryCount = 0) {
         }
 
         // Use content script message passing to extract captions
-        updateProgress(20 + (retryCount * 5), retryCount > 0 ? `正在重試提取字幕 (${retryCount}/${MAX_RETRIES})...` : '正在提取字幕內容...');
+        const statusMsg = retryCount > 0
+            ? getMessage('statusExtractingRetry', [retryCount, MAX_RETRIES])
+            : getMessage('statusExtracting');
+        updateProgress(20 + (retryCount * 5), statusMsg);
 
         const response = await chrome.tabs.sendMessage(tab.id, {
             type: 'EXTRACT_CAPTIONS',
@@ -456,7 +568,7 @@ async function fetchTranscript(videoId, retryCount = 0) {
         });
 
         if (response && response.transcript) {
-            updateProgress(30, '成功獲取字幕！');
+            updateProgress(30, getMessage('statusSuccessTranscript'));
             console.log('Successfully extracted transcript:', response.transcript.length, 'chars');
             return response.transcript;
         }
@@ -485,8 +597,8 @@ async function fetchTranscript(videoId, retryCount = 0) {
 
         // Provide user-friendly error message
         const errorMsg = retryCount >= MAX_RETRIES
-            ? `嘗試 ${MAX_RETRIES + 1} 次後仍無法獲取字幕。\n\n可能原因：\n• 影片沒有字幕或自動字幕\n• 頁面載入問題\n• 影片設定為私人或有地區限制\n\n請重新整理頁面後重試`
-            : '無法獲取影片字幕。\n\n可能原因：\n• 影片沒有字幕或自動字幕\n• 頁面尚未完全載入（請稍等片刻後重試）\n• 影片設定為私人或有地區限制\n\n請確認影片有可用的字幕後重試';
+            ? getMessage('errTranscriptMaxRetries')
+            : getMessage('errTranscriptFailed');
 
         throw new Error(errorMsg);
     }
@@ -558,14 +670,14 @@ async function handleCopy() {
 
         // Visual feedback
         const originalText = elements.copyBtn.textContent;
-        elements.copyBtn.textContent = '✅ 已複製！';
+        elements.copyBtn.textContent = getMessage('msgCopySuccess');
         setTimeout(() => {
             elements.copyBtn.textContent = originalText;
         }, 2000);
 
     } catch (error) {
         console.error('Failed to copy:', error);
-        alert('複製失敗，請手動選取內容複製');
+        alert(getMessage('msgCopyFail'));
     }
 }
 

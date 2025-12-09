@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            background-color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            padding: 50px;
+            align-items: flex-start;
+        }
+
+        .asset-container {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Global Gradients --- */
+        .bg-gradient {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2a2a40 50%, #1a1a2e 100%);
+            /* Deep Blue/Purple vibe */
+            background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+        }
+
+        /* --- Icon (300x300) --- */
+        #icon {
+            width: 300px;
+            height: 300px;
+            border-radius: 40px;
+            /* Rounded per spec suggestion, though store might want square, we will provide square file with rounded design inside or just full square */
+            border-radius: 0;
+            /* Keep square for export, design inside can be rounded */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top right, #4f46e5, #0f172a);
+        }
+
+        .logo-symbol {
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .play-shape {
+            width: 0;
+            height: 0;
+            border-top: 35px solid transparent;
+            border-bottom: 35px solid transparent;
+            border-left: 60px solid #ef4444;
+            /* Red */
+            margin-left: 10px;
+            filter: drop-shadow(0 4px 6px rgba(239, 68, 68, 0.4));
+        }
+
+        .doc-lines {
+            position: absolute;
+            right: -20px;
+            bottom: -10px;
+            width: 80px;
+            height: 100px;
+            background: #fff;
+            border-radius: 10px;
+            transform: rotate(-10deg);
+            z-index: -1;
+            opacity: 0.9;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .line {
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 3px;
+            width: 100%;
+        }
+
+        .line.short {
+            width: 60%;
+        }
+
+        /* --- Small Tile (440x280) --- */
+        #small-tile {
+            width: 440px;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: start;
+            padding: 40px;
+            box-sizing: border-box;
+            background: linear-gradient(120deg, #1e1b4b, #4338ca);
+            position: relative;
+        }
+
+        #small-tile h1 {
+            font-size: 32px;
+            color: white;
+            margin: 0;
+            line-height: 1.2;
+            font-weight: 800;
+            z-index: 10;
+        }
+
+        #small-tile h2 {
+            font-size: 16px;
+            color: #a5b4fc;
+            margin-top: 10px;
+            font-weight: 500;
+            z-index: 10;
+        }
+
+        .deco-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Large Banner (1400x560) --- */
+        #large-banner {
+            width: 1400px;
+            height: 560px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(105deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
+            padding: 0 100px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .banner-content {
+            z-index: 10;
+            max-width: 500px;
+        }
+
+        .banner-content h1 {
+            font-size: 72px;
+            color: white;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+
+        .banner-content p {
+            font-size: 24px;
+            color: #c7d2fe;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .banner-visual {
+            width: 600px;
+            height: 400px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .mock-window {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .mock-header {
+            height: 30px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+
+        .dot.r {
+            background: #fca5a5;
+        }
+
+        .dot.y {
+            background: #fdba74;
+        }
+
+        .dot.g {
+            background: #86efac;
+        }
+
+        .mock-body {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .mock-sidebar {
+            width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .skeleton-block {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+
+        .mock-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .arrow-connector {
+            position: absolute;
+            top: 50%;
+            left: -40px;
+            font-size: 60px;
+            color: #818cf8;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. Extension Icon (300x300) -->
+    <div id="icon" class="asset-container">
+        <div class="logo-symbol">
+            <div class="play-shape"></div>
+            <div class="doc-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line short"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Small Promo Tile (440x280) -->
+    <div id="small-tile" class="asset-container">
+        <div class="deco-circle" style="width: 200px; height: 200px; top: -50px; right: -50px;"></div>
+        <div class="deco-circle" style="width: 100px; height: 100px; bottom: 30px; left: -20px; opacity: 0.3;"></div>
+        <h1>YouTube<br>to Blog</h1>
+        <h2>Summarize & Convert Videos instantly</h2>
+        <div style="position: absolute; right: 40px; bottom: 40px;">
+            <!-- Mini Icon Version -->
+            <div
+                style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div
+                    style="width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 18px solid white;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Large Promo Banner (1400x560) -->
+    <div id="large-banner" class="asset-container">
+        <div class="deco-circle"
+            style="width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(0,0,0,0) 70%); top: -100px; left: -100px;">
+        </div>
+
+        <div class="banner-content">
+            <h1>Turn Videos<br>into<br><span style="color: #818cf8;">Blog Posts</span></h1>
+            <p>Save time with AI-powered summaries and content generation.</p>
+        </div>
+
+        <div class="banner-visual">
+            <div class="mock-window">
+                <div class="mock-header">
+                    <div class="dot r"></div>
+                    <div class="dot y"></div>
+                    <div class="dot g"></div>
+                </div>
+                <div class="mock-body">
+                    <!-- Left: Fake Video Player -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+                        <div class="skeleton-block"
+                            style="height: 120px; background: #cbd5e1; display:flex; align-items:center; justify-content:center;">
+                            <div
+                                style="width: 40px; height: 40px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <div
+                                    style="width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid white;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="skeleton-block" style="height: 12px; width: 80%;"></div>
+                        <div class="skeleton-block" style="height: 12px; width: 50%;"></div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div style="display:flex; align-items:center; color: #6366f1; font-weight:bold; font-size: 20px;">→
+                    </div>
+
+                    <!-- Right: Fake Blog Post -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+                        <div class="skeleton-block" style="height: 20px; width: 90%; background: #94a3b8;"></div>
+                        <div class="skeleton-block" style="height: 10px; width: 100%;"></div>
+                        <div class="skeleton-block" style="height: 10px; width: 100%;"></div>
+                        <div class="skeleton-block" style="height: 10px; width: 95%;"></div>
+                        <div class="skeleton-block" style="height: 10px; width: 90%;"></div>
+                        <div class="skeleton-block" style="height: 60px; width: 100%;"></div>
+                        <div class="skeleton-block" style="height: 10px; width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. App Screenshot Mockup (1280x800) -->
+    <div id="mockup-screenshot" class="asset-container"
+        style="width: 1280px; height: 800px; padding: 0; background: #fff;">
+        <div class="mock-window" style="border-radius: 0; box-shadow: none;">
+            <div class="mock-header" style="height: 40px; padding-left: 20px;">
+                <div class="dot r"></div>
+                <div class="dot y"></div>
+                <div class="dot g"></div>
+                <div
+                    style="margin-left: 20px; flex: 1; background: #fff; height: 26px; border-radius: 6px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: #64748b;">
+                    https://www.youtube.com/watch?v=example
+                </div>
+            </div>
+            <div style="flex: 1; display: flex; position: relative; background: #f8fafc;">
+                <!-- Main Content (YouTube Video) -->
+                <div style="flex: 1; padding: 40px; display: flex; flex-direction: column; gap: 20px;">
+                    <div
+                        style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://img.youtube.com/vi/LxX-52qQ_fQ/maxresdefault.jpg"
+                            style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+                        <div
+                            style="width: 80px; height: 80px; background: rgba(0,0,0,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute;">
+                            <div
+                                style="width: 0; height: 0; border-top: 15px solid transparent; border-bottom: 15px solid transparent; border-left: 25px solid white; margin-left: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: 30px; width: 60%; background: #cbd5e1; border-radius: 6px;"></div>
+                    <div style="display: flex; gap: 10px;">
+                        <div style="height: 40px; width: 40px; background: #cbd5e1; border-radius: 50%;"></div>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                            <div style="height: 14px; width: 30%; background: #e2e8f0; border-radius: 4px;"></div>
+                            <div style="height: 14px; width: 20%; background: #e2e8f0; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side Panel (Extension) -->
+                <div
+                    style="width: 400px; background: #fff; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                    <div
+                        style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="width: 24px; height: 24px; background: linear-gradient(135deg, #ef4444, #4f46e5); border-radius: 6px;">
+                        </div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1e293b;">YouTube to Blog</h3>
+                    </div>
+
+                    <div
+                        style="padding: 20px; display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto;">
+                        <!-- Controls -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-size: 12px; font-weight: 500; color: #64748b;">AI Provider</label>
+                            <div
+                                style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; color: #334155; display: flex; justify-content: space-between;">
+                                Google Gemini <span style="color: #94a3b8;">▼</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-size: 12px; font-weight: 500; color: #64748b;">Action</label>
+                            <div
+                                style="padding: 12px; background: #4f46e5; color: white; text-align: center; border-radius: 8px; font-weight: 500; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);">
+                                Generate Blog Post
+                            </div>
+                        </div>
+
+                        <div style="height: 1px; background: #e2e8f0; margin: 10px 0;"></div>
+
+                        <!-- Result Area -->
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #1e293b;">Project Management Tutorial
+                                Summary</div>
+                            <div style="font-size: 13px; color: #475569; line-height: 1.6;">
+                                <p style="margin: 0 0 10px 0;">In this comprehensive guide, we explore the fundamentals
+                                    of project management...</p>
+                                <div
+                                    style="background: #f1f5f9; padding: 10px; border-radius: 6px; border-left: 3px solid #4f46e5;">
+                                    <strong>Key Takeaways:</strong>
+                                    <ul style="margin: 5px 0 0 20px; padding: 0;">
+                                        <li>Define clear goals</li>
+                                        <li>Manage stakeholders</li>
+                                        <li>Track progress daily</li>
+                                    </ul>
+                                </div>
+                                <p style="margin: 10px 0;">The speaker emphasizes that communication is the most
+                                    critical tool for any manager.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

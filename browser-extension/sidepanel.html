@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -12,23 +12,30 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🎬 YouTube 轉部落格</h1>
-            <p class="subtitle">使用 AI 將影片轉換為 SEO 優化文章</p>
+            <div class="header-top">
+                <h1 data-i18n="headerTitle">🎬 YouTube to Blog</h1>
+                <select id="ui-language-select" class="lang-switcher" title="Interface Language">
+                    <option value="en">🌐 EN</option>
+                    <option value="zh_TW">🌐 繁中</option>
+                </select>
+            </div>
+            <p class="subtitle" data-i18n="headerSubtitle">Convert videos to SEO-optimized articles using AI</p>
         </header>
 
         <!-- Form Section -->
         <section id="form-section" class="section">
             <!-- Video URL Display -->
             <div class="form-group">
-                <label for="video-url">YouTube 影片網址</label>
-                <input type="text" id="video-url" placeholder="自動偵測目前頁面的影片..." readonly class="readonly-input">
-                <small class="hint" id="url-hint">請開啟 YouTube 影片頁面</small>
+                <label for="video-url" data-i18n="lblVideoUrl">YouTube Video URL</label>
+                <input type="text" id="video-url" placeholder="Automatically detecting video from current page..."
+                    data-i18n-placeholder="phVideoUrl" readonly class="readonly-input">
+                <small class="hint" id="url-hint" data-i18n="hintVideoUrl">Please open a YouTube video page</small>
             </div>
 
             <!-- AI Provider Selection -->
             <div class="form-group">
-                <label for="provider-select">
-                    🤖 AI 供應商
+                <label for="provider-select" data-i18n="lblProvider">
+                    🤖 AI Provider
                 </label>
                 <select id="provider-select">
                     <option value="gemini">Google Gemini 🆓</option>
@@ -41,28 +48,39 @@
 
             <!-- Model Selection -->
             <div class="form-group">
-                <label for="model-select">⚙️ AI 模型</label>
+                <label for="model-select" data-i18n="lblModel">⚙️ AI Model</label>
                 <select id="model-select">
                     <!-- Will be populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Output Language Selection -->
+            <div class="form-group">
+                <label for="output-language-select" data-i18n="lblOutputLanguage">
+                    🌐 Output Language
+                </label>
+                <select id="output-language-select">
+                    <option value="English" data-i18n="optLangEnglish">English</option>
+                    <option value="Traditional Chinese" data-i18n="optLangChinese">Traditional Chinese</option>
                 </select>
             </div>
 
             <!-- API Key Input -->
             <div class="form-group">
                 <label for="api-key">
-                    🔑 API Key
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link"
-                        id="api-key-link">
-                        (取得 API Key)
+                    <span data-i18n="lblApiKey">🔑 API Key</span>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="help-link" id="api-key-link"
+                        data-i18n="linkGetApiKey">
+                        (Get API Key)
                     </a>
                 </label>
-                <input type="password" id="api-key" placeholder="輸入您的 API Key">
-                <small class="hint">您的 API Key 會安全儲存在本地</small>
+                <input type="password" id="api-key" placeholder="Enter your API Key" data-i18n-placeholder="phApiKey">
+                <small class="hint" data-i18n="hintApiKey">Your API Key will be stored securely locally</small>
             </div>
 
             <!-- Convert Button -->
-            <button id="convert-btn" class="btn-primary" disabled>
-                🚀 開始轉換
+            <button id="convert-btn" class="btn-primary" disabled data-i18n="btnConvert">
+                🚀 Start Conversion
             </button>
         </section>
 
@@ -70,8 +88,8 @@
         <section id="loading-section" class="section hidden">
             <div class="loading-container">
                 <div class="spinner"></div>
-                <h3>正在處理中...</h3>
-                <p id="loading-status">準備中...</p>
+                <h3 data-i18n="lblProcessing">Processing...</h3>
+                <p id="loading-status" data-i18n="statusPreparing">Preparing...</p>
                 <div class="progress-bar">
                     <div id="progress-fill" class="progress-fill"></div>
                 </div>
@@ -81,16 +99,16 @@
         <!-- Result Section -->
         <section id="result-section" class="section hidden">
             <div class="result-header">
-                <h3>✅ 轉換完成！</h3>
+                <h3 data-i18n="headerResult">✅ Conversion Complete!</h3>
                 <div class="action-buttons">
-                    <button id="copy-btn" class="btn-secondary">
-                        📋 複製內容
+                    <button id="copy-btn" class="btn-secondary" data-i18n="btnCopy">
+                        📋 Copy Content
                     </button>
-                    <button id="download-btn" class="btn-secondary">
-                        💾 下載 .md
+                    <button id="download-btn" class="btn-secondary" data-i18n="btnDownload">
+                        💾 Download .md
                     </button>
-                    <button id="new-conversion-btn" class="btn-secondary">
-                        🔄 新轉換
+                    <button id="new-conversion-btn" class="btn-secondary" data-i18n="btnNew">
+                        🔄 New Conversion
                     </button>
                 </div>
             </div>
@@ -103,10 +121,10 @@
         <!-- Error Section -->
         <section id="error-section" class="section hidden">
             <div class="error-container">
-                <h3>❌ 發生錯誤</h3>
+                <h3 data-i18n="headerError">❌ Error Occurred</h3>
                 <p id="error-message" class="error-message"></p>
-                <button id="retry-btn" class="btn-primary">
-                    🔄 重試
+                <button id="retry-btn" class="btn-primary" data-i18n="btnRetry">
+                    🔄 Retry
                 </button>
             </div>
         </section>

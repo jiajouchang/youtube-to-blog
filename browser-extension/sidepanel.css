@@ -49,6 +49,32 @@ body {
     margin-bottom: 8px;
 }
 
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.header-top h1 {
+    margin-bottom: 0;
+}
+
+.lang-switcher {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.lang-switcher option {
+    color: #333;
+    background: white;
+}
+
 .subtitle {
     font-size: 14px;
     opacity: 0.9;

@@ -1,0 +1,150 @@
+{
+    "appName": {
+        "message": "YouTube to Blog Article",
+        "description": "The name of the application"
+    },
+    "appDesc": {
+        "message": "Convert YouTube videos to SEO-optimized blog articles using various AI models (Gemini, Groq, OpenAI, Claude, DeepSeek)",
+        "description": "The description of the application"
+    },
+    "headerTitle": {
+        "message": "🎬 YouTube to Blog"
+    },
+    "headerSubtitle": {
+        "message": "Convert videos to SEO-optimized articles using AI"
+    },
+    "lblVideoUrl": {
+        "message": "YouTube Video URL"
+    },
+    "phVideoUrl": {
+        "message": "Automatically detecting video from current page..."
+    },
+    "hintVideoUrl": {
+        "message": "Please open a YouTube video page"
+    },
+    "hintVideoId": {
+        "message": "Video ID: $ID$",
+        "placeholders": {
+            "id": {
+                "content": "$1"
+            }
+        }
+    },
+    "lblProvider": {
+        "message": "🤖 AI Provider"
+    },
+    "lblModel": {
+        "message": "⚙️ AI Model"
+    },
+    "lblOutputLanguage": {
+        "message": "🌐 Output Language"
+    },
+    "lblApiKey": {
+        "message": "🔑 API Key"
+    },
+    "linkGetApiKey": {
+        "message": "(Get API Key)"
+    },
+    "linkGetProviderApiKey": {
+        "message": "(Get $PROVIDER$ API Key)",
+        "placeholders": {
+            "provider": {
+                "content": "$1"
+            }
+        }
+    },
+    "phApiKey": {
+        "message": "Enter your API Key"
+    },
+    "hintApiKey": {
+        "message": "Your API Key will be stored securely locally"
+    },
+    "btnConvert": {
+        "message": "🚀 Start Conversion"
+    },
+    "lblProcessing": {
+        "message": "Processing..."
+    },
+    "statusPreparing": {
+        "message": "Preparing..."
+    },
+    "statusExtracting": {
+        "message": "Extracting video captions..."
+    },
+    "statusExtractingRetry": {
+        "message": "Retrying transcript extraction ($CURRENT$/$MAX$)...",
+        "placeholders": {
+            "current": {
+                "content": "$1"
+            },
+            "max": {
+                "content": "$2"
+            }
+        }
+    },
+    "statusGenerating": {
+        "message": "Generating blog post with $PROVIDER$...",
+        "placeholders": {
+            "provider": {
+                "content": "$1"
+            }
+        }
+    },
+    "statusComplete": {
+        "message": "Complete!"
+    },
+    "statusSuccessTranscript": {
+        "message": "Successfully extracted transcript!"
+    },
+    "headerResult": {
+        "message": "✅ Conversion Complete!"
+    },
+    "btnCopy": {
+        "message": "📋 Copy Content"
+    },
+    "btnDownload": {
+        "message": "💾 Download .md"
+    },
+    "btnNew": {
+        "message": "🔄 New Conversion"
+    },
+    "headerError": {
+        "message": "❌ Error Occurred"
+    },
+    "btnRetry": {
+        "message": "🔄 Retry"
+    },
+    "msgCopySuccess": {
+        "message": "✅ Copied!"
+    },
+    "msgCopyFail": {
+        "message": "Copy failed, please select and copy manually"
+    },
+    "errNoVideo": {
+        "message": "Please ensure video is selected and API Key is entered"
+    },
+    "errNoPage": {
+        "message": "Could not find YouTube page"
+    },
+    "errWrongUrl": {
+        "message": "Please ensure you are on a YouTube video page"
+    },
+    "errTranscriptFailed": {
+        "message": "Failed to extract transcript"
+    },
+    "errTranscriptMaxRetries": {
+        "message": "Failed to get captions after multiple attempts.\n\nPossible reasons:\n• Video has no captions or auto-captions\n• Page loading issues\n• Video is private or region-restricted\n\nPlease refresh the page and try again."
+    },
+    "errConversionFailed": {
+        "message": "Conversion failed, please try again"
+    },
+    "errAiNoContent": {
+        "message": "AI failed to generate valid content"
+    },
+    "optLangEnglish": {
+        "message": "English"
+    },
+    "optLangChinese": {
+        "message": "Traditional Chinese"
+    }
+}

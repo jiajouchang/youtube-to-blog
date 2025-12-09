@@ -1,0 +1,16 @@
+To the Certification Team:
+
+**Testing Instructions:**
+1. **Prerequisite**: This extension requires a Google Gemini API Key. You can use any free Gemini API key (obtainable at https://aistudio.google.com/app/apikey).
+2. **Open a Video**: Navigate to any YouTube video page (e.g., https://www.youtube.com/watch?v=LxX-52qQ_fQ).
+3. **Launch**: Open the extension via the browser Side Panel.
+4. **Setup**: Enter a valid Gemini API Key in the settings input field.
+5. **Execute**: Click the "Generate" button. The extension will fetch the transcript and stream the generated blog post.
+
+**Mechanism & Permissions:**
+- **storage**: Strictly used to save the user's API key locally within the browser. No data is synced to any developer server.
+- **activeTab / scripting**: Required to access the DOM of the active YouTube tab to extract the `ytInitialPlayerResponse` for caption data.
+- **sidePanel**: Provides the primary user interface.
+
+**Privacy Declaration:**
+This extension operates entirely client-side. It makes direct API calls to Google's Gemini API using the user's key. No user data, browsing history, or transcripts are collected or stored by the developer.

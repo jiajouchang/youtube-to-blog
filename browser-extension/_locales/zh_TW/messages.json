@@ -1,0 +1,148 @@
+{
+    "appName": {
+        "message": "YouTube 轉部落格文章"
+    },
+    "appDesc": {
+        "message": "使用多種 AI (Gemini, Groq, OpenAI, Claude, DeepSeek) 將 YouTube 影片轉換為 SEO 優化的部落格文章"
+    },
+    "headerTitle": {
+        "message": "🎬 YouTube 轉部落格"
+    },
+    "headerSubtitle": {
+        "message": "使用 AI 將影片轉換為 SEO 優化文章"
+    },
+    "lblVideoUrl": {
+        "message": "YouTube 影片網址"
+    },
+    "phVideoUrl": {
+        "message": "自動偵測目前頁面的影片..."
+    },
+    "hintVideoUrl": {
+        "message": "請開啟 YouTube 影片頁面"
+    },
+    "hintVideoId": {
+        "message": "影片 ID: $ID$",
+        "placeholders": {
+            "id": {
+                "content": "$1"
+            }
+        }
+    },
+    "lblProvider": {
+        "message": "🤖 AI 供應商"
+    },
+    "lblModel": {
+        "message": "⚙️ AI 模型"
+    },
+    "lblOutputLanguage": {
+        "message": "🌐 輸出語言"
+    },
+    "lblApiKey": {
+        "message": "🔑 API Key"
+    },
+    "linkGetApiKey": {
+        "message": "(取得 API Key)"
+    },
+    "linkGetProviderApiKey": {
+        "message": "(取得 $PROVIDER$ API Key)",
+        "placeholders": {
+            "provider": {
+                "content": "$1"
+            }
+        }
+    },
+    "phApiKey": {
+        "message": "輸入您的 API Key"
+    },
+    "hintApiKey": {
+        "message": "您的 API Key 會安全儲存在本地"
+    },
+    "btnConvert": {
+        "message": "🚀 開始轉換"
+    },
+    "lblProcessing": {
+        "message": "正在處理中..."
+    },
+    "statusPreparing": {
+        "message": "準備中..."
+    },
+    "statusExtracting": {
+        "message": "正在獲取影片字幕..."
+    },
+    "statusExtractingRetry": {
+        "message": "正在重試提取字幕 ($CURRENT$/$MAX$)...",
+        "placeholders": {
+            "current": {
+                "content": "$1"
+            },
+            "max": {
+                "content": "$2"
+            }
+        }
+    },
+    "statusGenerating": {
+        "message": "正在使用 $PROVIDER$ 生成部落格文章...",
+        "placeholders": {
+            "provider": {
+                "content": "$1"
+            }
+        }
+    },
+    "statusComplete": {
+        "message": "完成！"
+    },
+    "statusSuccessTranscript": {
+        "message": "成功獲取字幕！"
+    },
+    "headerResult": {
+        "message": "✅ 轉換完成！"
+    },
+    "btnCopy": {
+        "message": "📋 複製內容"
+    },
+    "btnDownload": {
+        "message": "💾 下載 .md"
+    },
+    "btnNew": {
+        "message": "🔄 新轉換"
+    },
+    "headerError": {
+        "message": "❌ 發生錯誤"
+    },
+    "btnRetry": {
+        "message": "🔄 重試"
+    },
+    "msgCopySuccess": {
+        "message": "✅ 已複製！"
+    },
+    "msgCopyFail": {
+        "message": "複製失敗，請手動選取內容複製"
+    },
+    "errNoVideo": {
+        "message": "請確認已選擇影片並輸入 API Key"
+    },
+    "errNoPage": {
+        "message": "無法找到 YouTube 頁面"
+    },
+    "errWrongUrl": {
+        "message": "請確認您在 YouTube 影片頁面"
+    },
+    "errTranscriptFailed": {
+        "message": "無法提取字幕"
+    },
+    "errTranscriptMaxRetries": {
+        "message": "嘗試多次後仍無法獲取字幕。\n\n可能原因：\n• 影片沒有字幕或自動字幕\n• 頁面載入問題\n• 影片設定為私人或有地區限制\n\n請重新整理頁面後重試"
+    },
+    "errConversionFailed": {
+        "message": "轉換失敗，請重試"
+    },
+    "errAiNoContent": {
+        "message": "AI 未能生成有效的內容"
+    },
+    "optLangEnglish": {
+        "message": "英文"
+    },
+    "optLangChinese": {
+        "message": "繁體中文"
+    }
+}

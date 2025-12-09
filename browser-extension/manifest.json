@@ -1,8 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "YouTube 轉部落格文章",
-    "version": "4.0.0",
-    "description": "使用多種 AI (Gemini, Groq, OpenAI, Claude, DeepSeek) 將 YouTube 影片轉換為 SEO 優化的部落格文章",
+    "default_locale": "en",
+    "name": "__MSG_appName__",
+    "version": "4.2.0",
+    "description": "__MSG_appDesc__",
     "permissions": [
         "activeTab",
         "storage",
