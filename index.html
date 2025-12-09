@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube 轉部落格文章生成器 - 多 AI 支援</title>
-    <meta name="description" content="使用多種 AI (Gemini, OpenAI, Claude, Groq) 將 YouTube 視頻轉換為 SEO 優化的部落格文章">
+    <title>YouTube to Blog Generator - Multi AI Support</title>
+    <meta name="description"
+        content="Convert YouTube videos to SEO-optimized blog articles using various AI (Gemini, OpenAI, Claude, Groq)">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,11 +18,18 @@
         <!-- Header Section -->
         <header class="header">
             <div class="header-content">
-                <h1 class="main-title">
-                    <span class="icon">🎬</span>
-                    YouTube 轉部落格
-                </h1>
-                <p class="subtitle">支援多種 AI 供應商 • 串流生成 • 專業 SEO 優化</p>
+                <div class="header-top-row">
+                    <h1 class="main-title">
+                        <span class="icon">🎬</span>
+                        <span data-i18n="headerTitle">YouTube to Blog</span>
+                    </h1>
+                    <select id="uiLanguageSelect" class="ui-lang-switcher" title="Interface Language">
+                        <option value="en">🌐 English</option>
+                        <option value="zh_TW">🌐 繁體中文</option>
+                    </select>
+                </div>
+                <p class="subtitle" data-i18n="headerSubtitle">Multi AI Provider Support • Streaming Generation •
+                    Professional SEO Optimization</p>
             </div>
         </header>
 
@@ -32,10 +40,10 @@
                 <div class="form-group">
                     <label for="youtubeUrl" class="form-label">
                         <span class="label-icon">🔗</span>
-                        YouTube URL
+                        <span data-i18n="lblYoutubeUrl">YouTube URL</span>
                     </label>
                     <input type="text" id="youtubeUrl" class="form-input"
-                        placeholder="https://www.youtube.com/watch?v=..." required>
+                        placeholder="https://www.youtube.com/watch?v=..." data-i18n-placeholder="phYoutubeUrl" required>
                 </div>
 
                 <!-- AI Provider Selection -->
@@ -43,7 +51,7 @@
                     <div class="form-group">
                         <label for="providerSelect" class="form-label">
                             <span class="label-icon">🤖</span>
-                            AI 供應商
+                            <span data-i18n="lblProvider">AI Provider</span>
                         </label>
                         <select id="providerSelect" class="form-input">
                             <option value="gemini">Google Gemini 🆓</option>
@@ -56,7 +64,7 @@
                     <div class="form-group">
                         <label for="modelSelect" class="form-label">
                             <span class="label-icon">⚙️</span>
-                            模型
+                            <span data-i18n="lblModel">Model</span>
                         </label>
                         <select id="modelSelect" class="form-input">
                             <option value="gemini-2.0-flash">Gemini 2.0 Flash ⚡</option>
@@ -68,16 +76,17 @@
                 <div class="form-group">
                     <label for="apiKey" class="form-label">
                         <span class="label-icon">🔑</span>
-                        API Key
-                        <span class="api-hint">為所選供應商</span>
+                        <span data-i18n="lblApiKey">API Key</span>
+                        <span class="api-hint" data-i18n="hintApiKey">for selected provider</span>
                     </label>
-                    <input type="password" id="apiKey" class="form-input" placeholder="輸入您的 API 密鑰" required>
-                    <small class="form-hint">
-                        API 密鑰會安全儲存在您的瀏覽器中，不會上傳到服務器
+                    <input type="password" id="apiKey" class="form-input" placeholder="Enter your API Key"
+                        data-i18n-placeholder="phApiKey" required>
+                    <small class="form-hint" data-i18n="hintApiKeySafe">
+                        API Key is stored securely in your browser and not uploaded to server
                     </small>
                     <div id="apiLinkContainer" class="api-link-container" style="display: none;">
                         <span class="api-link-icon">🔗</span>
-                        <span class="api-link-text">獲取API密鑰：</span>
+                        <span class="api-link-text" data-i18n="lblGetApiKey">Get API Key:</span>
                         <a id="apiLink" href="#" target="_blank" rel="noopener noreferrer" class="api-link"></a>
                     </div>
                 </div>
@@ -87,25 +96,25 @@
                     <div class="form-group">
                         <label for="styleSelect" class="form-label">
                             <span class="label-icon">🎨</span>
-                            文章風格
+                            <span data-i18n="lblStyle">Article Style</span>
                         </label>
                         <select id="styleSelect" class="form-input">
-                            <option value="professional">專業正式</option>
-                            <option value="casual">輕鬆口語</option>
-                            <option value="technical">技術詳細</option>
-                            <option value="news">新聞報導</option>
+                            <option value="professional" data-i18n="optStyleProfessional">Professional</option>
+                            <option value="casual" data-i18n="optStyleCasual">Casual</option>
+                            <option value="technical" data-i18n="optStyleTechnical">Technical</option>
+                            <option value="news" data-i18n="optStyleNews">News Report</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="languageSelect" class="form-label">
                             <span class="label-icon">🌐</span>
-                            輸出語言
+                            <span data-i18n="lblLanguage">Output Language</span>
                         </label>
                         <select id="languageSelect" class="form-input">
+                            <option value="English">English</option>
                             <option value="繁體中文">繁體中文</option>
                             <option value="简体中文">简体中文</option>
-                            <option value="English">English</option>
                             <option value="日本語">日本語</option>
                         </select>
                     </div>
@@ -115,8 +124,8 @@
                 <div class="form-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="streamToggle">
-                        <span class="checkbox-text">
-                            ⚡ 啟用串流生成（即時顯示生成過程）
+                        <span class="checkbox-text" data-i18n="chkStreaming">
+                            ⚡ Enable streaming generation (show progress in real-time)
                         </span>
                     </label>
                 </div>
@@ -124,7 +133,7 @@
                 <!-- Submit Button -->
                 <button type="submit" class="btn-primary" id="submitBtn">
                     <span class="btn-icon">✨</span>
-                    <span class="btn-text">生成部落格文章</span>
+                    <span class="btn-text" data-i18n="btnGenerate">Generate Blog Article</span>
                 </button>
             </form>
         </section>
@@ -133,19 +142,19 @@
         <section class="loading-section" id="loadingSection" style="display: none;">
             <div class="glass-card loading-card">
                 <div class="loading-spinner"></div>
-                <p class="loading-text" id="loadingText">正在處理中...</p>
+                <p class="loading-text" id="loadingText" data-i18n="loadingText">Processing...</p>
                 <div class="progress-steps">
                     <div class="step" id="step1">
                         <div class="step-icon">📹</div>
-                        <div class="step-text">獲取視頻資訊</div>
+                        <div class="step-text" data-i18n="step1">Fetching video info</div>
                     </div>
                     <div class="step" id="step2">
                         <div class="step-icon">📝</div>
-                        <div class="step-text">提取文字稿</div>
+                        <div class="step-text" data-i18n="step2">Extracting transcript</div>
                     </div>
                     <div class="step" id="step3">
                         <div class="step-icon">🤖</div>
-                        <div class="step-text">AI 生成文章</div>
+                        <div class="step-text" data-i18n="step3">AI generating article</div>
                     </div>
                 </div>
             </div>
@@ -157,20 +166,20 @@
                 <div class="result-header">
                     <h2 class="result-title">
                         <span class="icon">📄</span>
-                        生成的部落格文章
+                        <span data-i18n="resultTitle">Generated Blog Article</span>
                     </h2>
                     <div class="result-actions">
                         <button class="btn-secondary" id="copyBtn">
                             <span class="btn-icon">📋</span>
-                            複製
+                            <span data-i18n="btnCopy">Copy</span>
                         </button>
                         <button class="btn-secondary" id="downloadBtn">
                             <span class="btn-icon">⬇️</span>
-                            下載
+                            <span data-i18n="btnDownload">Download</span>
                         </button>
                         <button class="btn-secondary" id="newConversionBtn">
                             <span class="btn-icon">🔄</span>
-                            建立新的
+                            <span data-i18n="btnNew">Create New</span>
                         </button>
                     </div>
                 </div>
@@ -182,11 +191,11 @@
         <section class="error-section" id="errorSection" style="display: none;">
             <div class="glass-card error-card">
                 <div class="error-icon">⚠️</div>
-                <h3 class="error-title">發生錯誤</h3>
+                <h3 class="error-title" data-i18n="errorTitle">Error Occurred</h3>
                 <p class="error-message" id="errorMessage"></p>
                 <button class="btn-secondary" id="retryBtn">
                     <span class="btn-icon">🔄</span>
-                    重試
+                    <span data-i18n="btnRetry">Retry</span>
                 </button>
             </div>
         </section>
@@ -194,6 +203,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="webapp-i18n.js"></script>
     <script src="api-service.js"></script>
     <script src="app.js"></script>
 </body>

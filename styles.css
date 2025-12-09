@@ -484,6 +484,33 @@ body::before {
     gap: var(--spacing-sm);
 }
 
+.header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ui-lang-switcher {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ui-lang-switcher:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.ui-lang-switcher option {
+    color: #333;
+    background: white;
+}
+
 .result-title {
     font-size: 1.5rem;
     display: flex;

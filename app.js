@@ -10,6 +10,7 @@ const state = {
     generatedMarkdown: '',
     videoTitle: '',
     isStreaming: false,
+    uiLanguage: 'en' // Default UI language
 };
 
 // ===== DOM ELEMENTS =====
@@ -43,6 +44,7 @@ const elements = {
     errorSection: document.getElementById('errorSection'),
     errorMessage: document.getElementById('errorMessage'),
     retryBtn: document.getElementById('retryBtn'),
+    uiLanguageSelect: document.getElementById('uiLanguageSelect'),
 };
 
 // ===== UTILITY FUNCTIONS =====
@@ -177,7 +179,7 @@ function updateModelOptions(providerId) {
     // Update API link display
     if (provider.apiUrl && elements.apiLinkContainer && elements.apiLink) {
         elements.apiLink.href = provider.apiUrl;
-        elements.apiLink.textContent = provider.name + ' API 密鑰申請';
+        elements.apiLink.textContent = provider.name + ' ' + getWebAppMessage('lblGetApiKey').replace(':', '');
         elements.apiLinkContainer.style.display = 'flex';
     } else if (elements.apiLinkContainer) {
         elements.apiLinkContainer.style.display = 'none';
@@ -194,18 +196,18 @@ async function handleConversion(e) {
     const provider = elements.providerSelect?.value || 'gemini';
     const model = elements.modelSelect?.value;
     const style = elements.styleSelect?.value || 'professional';
-    const language = elements.languageSelect?.value || '繁體中文';
+    const language = elements.languageSelect?.value || 'English';
     const useStreaming = elements.streamToggle?.checked || false;
 
     // Validation
     if (!youtubeUrl || !apiKey) {
-        showError('請填寫所有必填欄位');
+        showError(getWebAppMessage('errFillFields'));
         return;
     }
 
     const videoId = extractVideoId(youtubeUrl);
     if (!videoId) {
-        showError('無效的 YouTube URL，請檢查您的輸入');
+        showError(getWebAppMessage('errInvalidUrl'));
         return;
     }
 
@@ -220,17 +222,17 @@ async function handleConversion(e) {
 
     try {
         // Step 1: Fetch transcript
-        updateProgress(1, '正在獲取視頻資訊...');
+        updateProgress(1, getWebAppMessage('statusFetching'));
         const transcriptData = await API.getTranscript(videoId);
 
         if (!transcriptData.transcript || transcriptData.transcript.trim().length === 0) {
-            throw new Error('此視頻沒有可用的文字稿');
+            throw new Error(getWebAppMessage('errNoTranscript'));
         }
 
-        updateProgress(2, '成功提取文字稿！');
+        updateProgress(2, getWebAppMessage('statusExtracted'));
 
         // Step 3: Generate blog post
-        updateProgress(3, `正在使用 ${provider} 生成部落格文章...`);
+        updateProgress(3, getWebAppMessage('statusGenerating', { provider: provider }));
 
         let blogPost;
 
@@ -241,7 +243,7 @@ async function handleConversion(e) {
 
             // Show result section early for streaming
             if (elements.resultContent) {
-                elements.resultContent.innerHTML = '<p class="streaming-indicator">✨ AI 正在生成中...</p>';
+                elements.resultContent.innerHTML = '<p class="streaming-indicator">' + getWebAppMessage('streamingIndicator') + '</p>';
             }
             showSection(elements.resultSection);
 
@@ -290,8 +292,8 @@ async function handleConversion(e) {
         showSection(elements.resultSection);
 
     } catch (error) {
-        console.error('轉換錯誤:', error);
-        showError(error.message || '處理過程中發生錯誤');
+        console.error('Conversion error:', error);
+        showError(error.message || getWebAppMessage('errProcessing'));
     } finally {
         if (elements.submitBtn) {
             elements.submitBtn.disabled = false;
@@ -323,7 +325,7 @@ function setupEventListeners() {
                 await navigator.clipboard.writeText(state.generatedMarkdown);
 
                 const originalText = elements.copyBtn.innerHTML;
-                elements.copyBtn.innerHTML = '<span class="btn-icon">✓</span>已複製！';
+                elements.copyBtn.innerHTML = '<span class="btn-icon">✓</span>' + getWebAppMessage('msgCopied');
                 elements.copyBtn.style.background = 'rgba(16, 185, 129, 0.2)';
 
                 setTimeout(() => {
@@ -331,7 +333,7 @@ function setupEventListeners() {
                     elements.copyBtn.style.background = '';
                 }, 2000);
             } catch (error) {
-                alert('複製失敗，請手動選擇文字複製');
+                alert(getWebAppMessage('msgCopyFailed'));
             }
         });
     }
@@ -382,7 +384,15 @@ function setupEventListeners() {
 // ===== INITIALIZATION =====
 
 async function init() {
-    console.log('🚀 YouTube 轉部落格應用程式啟動中...');
+    console.log(getWebAppMessage('consoleStarting'));
+
+    // Initialize language
+    initWebAppLanguage();
+    state.uiLanguage = getWebAppLanguage();
+    if (elements.uiLanguageSelect) {
+        elements.uiLanguageSelect.value = state.uiLanguage;
+    }
+    localizeWebApp();
 
     // Load providers from API
     await loadProviders();
@@ -393,7 +403,20 @@ async function init() {
     // Setup event listeners
     setupEventListeners();
 
-    console.log('✅ 應用程式已準備就緒');
+    // UI Language change handler
+    if (elements.uiLanguageSelect) {
+        elements.uiLanguageSelect.addEventListener('change', (e) => {
+            state.uiLanguage = e.target.value;
+            setWebAppLanguage(e.target.value);
+            localizeWebApp();
+            // Update dynamic elements
+            if (state.selectedProvider) {
+                updateModelOptions(state.selectedProvider);
+            }
+        });
+    }
+
+    console.log(getWebAppMessage('consoleReady'));
 }
 
 // Start the app when DOM is ready
