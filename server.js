@@ -1,20 +1,39 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const { YoutubeTranscript } = require('youtube-transcript-plus');
 const { createProvider, getAllProviders, isValidProvider } = require(path.join(__dirname, 'server', 'services', 'ai-providers'));
+
+// Security modules
+const { corsOptions, helmetOptions } = require(path.join(__dirname, 'server', 'config', 'security'));
+const { generalLimiter, generateLimiter, transcriptLimiter } = require(path.join(__dirname, 'server', 'middleware', 'rateLimit'));
+const { errorHandler, notFoundHandler } = require(path.join(__dirname, 'server', 'middleware', 'errorHandler'));
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// ===== Security Middleware =====
+// Helmet for security headers
+app.use(helmet(helmetOptions));
+
+// CORS with origin restriction
+app.use(cors(corsOptions));
+
+// Request parsing
+app.use(express.json({ limit: '1mb' }));
+
+// General rate limiting
+app.use('/api/', generalLimiter);
+
+// Static files
 app.use(express.static('.'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Extract video ID from YouTube URL
 function extractVideoId(url) {
@@ -44,8 +63,8 @@ app.get('/api/providers', (req, res) => {
   }
 });
 
-// Get YouTube transcript
-app.get('/api/transcript', async (req, res) => {
+// Get YouTube transcript (with rate limiting)
+app.get('/api/transcript', transcriptLimiter, async (req, res) => {
   try {
     const { videoId, language } = req.query;
 
@@ -100,13 +119,13 @@ app.get('/api/transcript', async (req, res) => {
 
     res.status(500).json({
       error: '服務器錯誤',
-      message: error.message || '獲取文字稿時發生未知錯誤'
+      message: isProduction ? '獲取文字稿時發生錯誤' : (error.message || '獲取文字稿時發生未知錯誤')
     });
   }
 });
 
-// Generate blog post using selected AI provider
-app.post('/api/generate', async (req, res) => {
+// Generate blog post using selected AI provider (with strict rate limiting)
+app.post('/api/generate', generateLimiter, async (req, res) => {
   try {
     const {
       transcript,
@@ -176,7 +195,7 @@ app.post('/api/generate', async (req, res) => {
     } else {
       res.status(500).json({
         error: '生成失敗',
-        message: error.message
+        message: isProduction ? '生成文章時發生錯誤，請稍後再試' : error.message
       });
     }
   }
@@ -191,10 +210,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ===== Error Handling =====
+// 404 handler (must be after all routes)
+app.use(notFoundHandler);
+
+// Global error handler (must be last middleware)
+app.use(errorHandler);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`\n🚀 YouTube 轉部落格服務器運行中`);
   console.log(`📍 http://localhost:${PORT}`);
-  console.log(`🤖 支援的 AI 供應商: Gemini, OpenAI, Anthropic, Groq`);
-  console.log(`⚙️  環境: ${process.env.NODE_ENV || 'development'}\n`);
+  console.log(`🤖 支援的 AI 供應商: Gemini, OpenAI, Anthropic, Groq, DeepSeek, Zhipu, Moonshot, Mistral, Cohere`);
+  console.log(`🔒 安全模式: ${isProduction ? '生產環境' : '開發環境'}`);
+  console.log(`⚙️  Rate Limiting: 已啟用\n`);
 });

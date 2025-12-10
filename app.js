@@ -1,6 +1,9 @@
 // Modern YouTube to Blog Application
 // Multi AI Provider Support with Streaming
 
+// Production mode detection
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
 // ===== STATE MANAGEMENT =====
 const state = {
     providers: [],
@@ -150,7 +153,7 @@ async function loadProviders() {
             updateModelOptions(state.selectedProvider);
         }
     } catch (error) {
-        console.error('載入供應商失敗:', error);
+        if (!isProduction) console.error('載入供應商失敗:', error);
     }
 }
 
@@ -292,7 +295,7 @@ async function handleConversion(e) {
         showSection(elements.resultSection);
 
     } catch (error) {
-        console.error('Conversion error:', error);
+        if (!isProduction) console.error('Conversion error:', error);
         showError(error.message || getWebAppMessage('errProcessing'));
     } finally {
         if (elements.submitBtn) {
@@ -384,7 +387,7 @@ function setupEventListeners() {
 // ===== INITIALIZATION =====
 
 async function init() {
-    console.log(getWebAppMessage('consoleStarting'));
+    if (!isProduction) console.log(getWebAppMessage('consoleStarting'));
 
     // Initialize language
     initWebAppLanguage();
@@ -416,7 +419,7 @@ async function init() {
         });
     }
 
-    console.log(getWebAppMessage('consoleReady'));
+    if (!isProduction) console.log(getWebAppMessage('consoleReady'));
 }
 
 // Start the app when DOM is ready

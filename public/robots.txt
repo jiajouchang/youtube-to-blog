@@ -1,0 +1,15 @@
+# 搜尋引擎爬蟲控制
+# YouTube to Blog Generator
+
+User-agent: *
+Allow: /
+
+# 禁止爬取 API 端點
+Disallow: /api/
+
+# 禁止爬取敏感目錄
+Disallow: /server/
+Disallow: /node_modules/
+
+# Sitemap (如有)
+# Sitemap: https://your-domain.com/sitemap.xml
